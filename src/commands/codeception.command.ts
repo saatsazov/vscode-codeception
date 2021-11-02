@@ -68,21 +68,12 @@ export class CodeceptionCommand {
     get parseFile(): string {
         if (vscode.window.activeTextEditor) {
             // get the currently selected file
-            const { fileName } = vscode.window.activeTextEditor.document;
-            
-            // split the file path by the tests directory
-            const splitFilePath = fileName.split('/tests/').pop();
+            const relativePath = vscode.workspace.asRelativePath(vscode.window.activeTextEditor.document.fileName);
 
-            if (splitFilePath) {
-                // splitFilePath will now be '/api/unit/Test.php'
-                // split by / and grab the first item: 'api'
-                const testType = splitFilePath.split('/')[0];
+            const moduleName = relativePath.split('/')[0];
 
-                // construct the command by appending the test type
-                // and the full path url
-                // e.g: api tests/unit/Test.php
-                return `-s ${testType} tests/${fileName}`;
-            }
+            return `-s ${moduleName} ${relativePath}`;
+
         }
 
         // could not parse the file url for some reason...
@@ -101,13 +92,13 @@ export class CodeceptionCommand {
         return new Promise((resolve, reject) => {
             if (editor && this._scopeFinder) {
                 const pos: vscode.Position = editor.selection.start;
-    
+
                 if (!pos) {
                     return '';
                 }
-    
+
                 let node: SymbolNode | null;
-    
+
                 setTimeout(async (token: vscode.CancellationToken) => {
                     if (token.isCancellationRequested) {
                         return;
@@ -116,11 +107,11 @@ export class CodeceptionCommand {
                         return '';
                     }
                     let node: SymbolNode | null;
-    
+
                     try {
                         if (this._scopeFinder) {
                             node = await this._scopeFinder.getScopeNode(pos);
-    
+
                             if (node) {
                                 resolve(node.getMethodName)
                             }
