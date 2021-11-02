@@ -81,7 +81,7 @@ export class CodeceptionCommand {
                 // construct the command by appending the test type
                 // and the full path url
                 // e.g: api tests/unit/Test.php
-                return `${testType} tests/${splitFilePath}`;
+                return `-s ${testType} tests/${fileName}`;
             }
         }
 
